@@ -10,7 +10,7 @@ import {
 import {
 	DomSanitizer
 } from '@angular/platform-browser';
-
+import { CommentService } from '../services/comment.service';
 declare var tinymce: any;
 
 tinymce = require('tinymce');
@@ -21,9 +21,9 @@ tinymce = require('tinymce');
 	templateUrl: './new-doc.component.html'
 })
 export class NewDocComponent {
-	constructor(private _ngZone: NgZone,private sanitizer:DomSanitizer) {}
+	constructor(private _ngZone: NgZone,private sanitizer:DomSanitizer,private commentService: CommentService) {}
 	@Input() elementId: String;
-	@Input() content: any;
+	@Input() content: any = "See Spot Run. I am not spot. Run Spot Run. Spot is a dog. Spot can run.";
 
 	editor: any;
 
@@ -41,11 +41,28 @@ export class NewDocComponent {
 				});
 			},
 		});
+		this.attachComments();
+		
 	}
 
 	updateContent(content: any) {
 		this.content = this.sanitizer.bypassSecurityTrustHtml(content);
-
+		console.log(this.content)
+	}
+	
+	attachComments() {
+		
+		//do we want to strip out html? probably the indexing function makes 
+		//more sense late.
+		let commentsArray = this.commentService.findAllComments();
+		let arr:string[] = this.content.split("");
+		commentsArray.forEach(comment => {
+			arr[comment.startIndex] = "<strong>" + arr[comment.startIndex];
+			arr[comment.endIndex] = arr[comment.endIndex] + "</strong>";
+		})
+		this.updateContent(arr.join(""));
+			
+			
 	}
 
 
