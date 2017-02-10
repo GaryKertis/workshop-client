@@ -1,2 +1,10 @@
-<h3>Home Component</h3>
-<p>Welcome to Angular</p>
+<h3>Commuents</h3>
+
+<div class="row">
+    <div class="col-md-8" [innerHTML]="content">
+    </div>
+    <div class="col-md-4">
+    <span class="sentence">TESET</span>
+        <div *ngFor="let comment of comments" [hidden]="selectedSentence != comment.index">{{comment.text}}</div>
+    </div>
+</div>

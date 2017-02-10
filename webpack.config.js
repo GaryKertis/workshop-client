@@ -31,8 +31,8 @@ var webpackConfig = {
     resolve: {
         alias: {
             // require('tinymce') will do require('tinymce/tinymce') 
-            tinymce: 'tinymce/tinymce',
-        },
+            tinymce: 'tinymce/tinymce'
+        }
     },
     module: {
         loaders: [
@@ -49,7 +49,6 @@ var webpackConfig = {
             { test: /\.html$/, loader: 'raw-loader' }, {
                 // Only apply on tinymce/tinymce
                 include: require.resolve('tinymce/tinymce'),
-                // Export window.tinymce
                 loader: 'exports-loader?window.tinymce',
             }
         ]
@@ -89,7 +88,7 @@ var defaultConfig = {
         __dirname: true,
         __filename: true,
         process: true,
-        Buffer: false,
+        Buffer: true,
         clearImmediate: false,
         setImmediate: false
     }

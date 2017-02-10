@@ -1,9 +1,9 @@
-## angular2-seed
+## Workshop Client
 
-A simple starter project demonstrating the basic concepts of Angular 2.
-
+A simple document comment aggregator. Most document editors allow users to see all comments, or force users to create individual documents for individual comments. This app aims to solve that problem.
 
 ### Usage
+- Uses angular2 seed.
 - Clone or fork this repository
 - Make sure you have [node.js](https://nodejs.org/) installed version 5+
 - Make sure you have NPM installed version 3+

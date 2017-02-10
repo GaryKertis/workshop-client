@@ -1,14 +1,12 @@
 import { Injectable } from '@angular/core';
 
 class Comment {
-    constructor(text: string, startIndex: number, endIndex: number) {
+    constructor(text: string, index: number) {
         this.text = text;
-        this.startIndex = startIndex;
-        this.endIndex = endIndex;
+        this.index = index;
     }
     text: string;
-    startIndex: number;
-    endIndex: number;
+    index: number;
 }
 
 @Injectable()
@@ -18,7 +16,7 @@ export class CommentService {
   }
   
   findAllComments(): Comment[] {
-      return [new Comment("abc", 0, 5), new Comment("def", 7,9), new Comment("ghi", 12, 15)];
+      return [new Comment("abc", 0), new Comment("def", 0), new Comment("ghi", 2)];
   }
   
 }
