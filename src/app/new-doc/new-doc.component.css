@@ -1,0 +1,8 @@
+span {
+    background-color: pink;
+}
+
+.sentence:hover {
+    cursor: pointer;
+    background-color: yellow;
+}
