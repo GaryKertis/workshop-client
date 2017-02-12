@@ -1,4 +1,4 @@
-import { Component, OnDestroy, AfterViewInit, EventEmitter, Input, Output, NgZone, ViewEncapsulation } from '@angular/core';
+import { Component, OnDestroy, AfterViewInit, EventEmitter, Input, Output, NgZone, ViewEncapsulation, Renderer, ElementRef } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import * as parse5 from 'parse5';
 declare var parse5Utils: any;
@@ -14,15 +14,31 @@ tinymce = require('tinymce');
 
 })
 export class NewDocComponent {
-	constructor(private _ngZone: NgZone, private sanitizer: DomSanitizer) { }
+	constructor(private _ngZone: NgZone,
+		private sanitizer: DomSanitizer,
+		private renderer: Renderer,
+		private element: ElementRef
+	) {
+		this.nativeElement = element.nativeElement;
+		// Listen to click events in the component
+		this.listenFunc = this.renderer.listen(this.nativeElement, 'mouseover', (event) => {
+			// Do something with 'event'
+			event.target.id
+			
+		})
+	}
+
+	private nativeElement: Node;
 	@Input() elementId: String;
 	@Input() content: any;
 	counter: number = 0;
+	listenFunc: Function;
 
 	editor: any;
 
 	ngAfterViewInit() {
 		var app = this;
+
 		tinymce.init({
 			selector: '#tinymce',
 			plugins: ['link', 'paste', 'table'],
@@ -42,56 +58,38 @@ export class NewDocComponent {
 
 	ngOnDestroy() {
 		tinymce.remove(this.editor);
+		// Removes "listen" listener
+		this.listenFunc();
+
 	}
 
 	save() {
-		console.log('saving');
+		this.counter = 0;
 		var myHtmlString = tinymce.activeEditor.getContent();
 		var myHtmlDoc = parse5.parse(myHtmlString);
-		console.log(this.content, myHtmlString, myHtmlDoc);
 		this.walkTheDOM(myHtmlDoc, (node) => this.setUpSentences(node));
 		var html = parse5.serialize(myHtmlDoc);
 		this.updateContent(html);
 	}
 
 	setUpSentences(node) {
-
-		//still broken. need to fix.
-		//strategy:
-		//parse entire doc to text.
-		//split into array by sentences using below regex.
-		//surround sentences with span tags.
-		//for each sentence, use another regex to check for any unclosed tags. close them, in order, before the 
-		//last span.
-		//check also for any unopened tags. open them, in order?
-
-		//what about this?
-		//some<p>sentence like this. sentence like <bold>this</bold>. final</p>sentence.
-		//ideal scenario is
-		//<span>some</span><p><span>sentence like this.</span><span>sentence like <bold>this</bold>.</span><span>final</span></p><span>sentence</span>
-
-		//GENIUS.com-- when you highlight text that spans multiple tags, it dives down to the textNode and wraps it with a genius tag, so that 
-		//formatting is not disrupted. it then applys the same ID to all the wrapped text nodes, so that when the user highlights the 'appearance'
-		//of continuity is maintained. i.e. if one ID is hovered activate the hover class on all elements with the same Id. smart.
-
-		if (node.nodeName === "#text" && node.parentNode.nodeName !== "span") { // Is it a Text node?
+		if (node.nodeName === "#text") { // Is it a Text node?
 			if (node.value.length > 0) { // Does it have non white-space text content?
 				var sentences = node.value.replace(/([\.\?\!\n]\s*)/g, "$&|||").split("|||");
-				var siblings = node.parentNode.childNodes;
-				var index = node.parentNode.childNodes.indexOf(node);
+				var refNode = parse5Utils.createNode("span");
+				parse5Utils.setAttribute(refNode, "class", "sentence-group");
 				sentences.forEach(sentence => {
 					if (sentence.length) {
 						var newNode = parse5Utils.createNode("span");
 						var newTextNode = parse5Utils.createTextNode(sentence);
 						parse5Utils.append(newNode, newTextNode);
-						parse5Utils.setAttribute(newNode, "id", this.counter.toString());
+						parse5Utils.setAttribute(newNode, "workshop-id", this.counter.toString());
 						parse5Utils.setAttribute(newNode, "class", "sentence");
-						siblings.splice(index, 0, newNode);
-						index++;
-						this.counter++;
+						parse5Utils.append(refNode, newNode);
+						if (sentence.match(/([\.\?\!\n]\s*)/g)) this.counter++;
 					}
 				});
-				parse5Utils.remove(node);
+				parse5Utils.replace(node, refNode);
 			}
 		}
 	}
